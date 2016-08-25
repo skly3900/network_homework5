@@ -2,6 +2,8 @@ from scapy.all import *
 
 def backward_in(packet):
 		reverse_packet =packet.copy()
+		string = 'Blocked\r\n'
+		string += '\r\n'
 		print '************************************'
 		reverse_packet.show()
 		print '************************************'
@@ -12,12 +14,13 @@ def backward_in(packet):
 		reverse_packet[Ether].dst = packet[Ether].src
 		reverse_packet[IP].src = packet[IP].dst
 		reverse_packet[IP].dst = packet[IP].src
+		reverse_packet[IP].len = 40 + len(string)
 		reverse_packet[TCP].sport = packet[TCP].dport
 		reverse_packet[TCP].dport = packet[TCP].sport
 		reverse_packet[TCP].seq = packet[TCP].ack
 		reverse_packet[TCP].ack = packet[TCP].seq + seq_plus
-		reverse_packet[TCP].flags = 'F'
-		reverse_packet[Raw].load ="Blocked\r\n\r\n"
+		reverse_packet[TCP].flags = 'PA'
+		reverse_packet[Raw].load = string 
 		reverse_packet.show()
 		sendp(reverse_packet)
 
@@ -29,5 +32,5 @@ def http_monitor(pkt):
 			pkt.show()
 			backward_in(pkt)
 
-my_ip = '10.211.55.13'
-sniff(prn=http_monitor, filter='host 10.211.55.13 and tcp port 80',store=0)
+my_ip = '192.168.1.19'
+sniff(prn=http_monitor, filter='host 192.168.1.19 and tcp port 80',store=0)
